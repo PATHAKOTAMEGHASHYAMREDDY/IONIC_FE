@@ -1,8 +1,8 @@
 // src/environments/environment.prod.ts
-// This file is used when building for production (ng build --configuration production)
-// 👇 Change this URL to your deployed backend URL when deploying
+// Used automatically when building for production: ng build --configuration production
+// ✅ Replace YOUR-RENDER-SERVICE-NAME with your actual Render service name
 
 export const environment = {
   production: true,
-  apiUrl: 'http://YOUR_SERVER_IP:4000/graphql'   // ← update before production build
+  apiUrl: 'https://YOUR-RENDER-SERVICE-NAME.onrender.com/graphql'
 };
