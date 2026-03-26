@@ -4,5 +4,5 @@
 
 export const environment = {
   production: true,
-  apiUrl: 'https://YOUR-RENDER-SERVICE-NAME.onrender.com/graphql'
+  apiUrl: 'https://ionic-be.onrender.com/graphql'
 };
