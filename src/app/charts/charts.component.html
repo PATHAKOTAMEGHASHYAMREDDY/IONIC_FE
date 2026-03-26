@@ -1,0 +1,79 @@
+<div class="charts-container">
+  <!-- Top row: 4 small charts in a grid -->
+  <ion-grid class="charts-grid">
+    <ion-row>
+      <ion-col size="12" size-sm="6" size-lg="3">
+        <ion-card class="chart-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="people-outline"></ion-icon>
+              Total Students
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content class="chart-content">
+            <canvas #studentCountChart></canvas>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12" size-sm="6" size-lg="3">
+        <ion-card class="chart-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="trophy-outline"></ion-icon>
+              Top 5 Students
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content class="chart-content">
+            <canvas #topStudentsChart></canvas>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12" size-sm="6" size-lg="3">
+        <ion-card class="chart-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="bar-chart-outline"></ion-icon>
+              Subject Avg
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content class="chart-content">
+            <canvas #subjectAvgChart></canvas>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12" size-sm="6" size-lg="3">
+        <ion-card class="chart-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="pie-chart-outline"></ion-icon>
+              Pass / Fail
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content class="chart-content">
+            <canvas #passFailChart></canvas>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+
+    <!-- Full-width performance chart -->
+    <ion-row>
+      <ion-col size="12">
+        <ion-card class="chart-card chart-card-full">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="analytics-outline"></ion-icon>
+              All Students Performance
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content class="chart-content chart-content-full">
+            <canvas #allSubjectsChart></canvas>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</div>

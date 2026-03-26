@@ -1,0 +1,252 @@
+<ion-app>
+
+  <!-- ====== Header ====== -->
+  <ion-header [translucent]="true" class="app-header">
+    <ion-toolbar color="primary">
+      <ion-buttons slot="start">
+        <ion-icon name="school-outline" class="header-logo-icon"></ion-icon>
+      </ion-buttons>
+      <ion-title>
+        <span class="header-title">Student Management</span>
+      </ion-title>
+      <ion-buttons slot="end">
+        <ion-button fill="clear" class="toggle-btn" (click)="toggleCharts()" id="toggle-view-btn">
+          <ion-icon slot="start" [name]="showCharts ? 'list-outline' : 'analytics-outline'"></ion-icon>
+          {{ showCharts ? 'Students' : 'Charts' }}
+        </ion-button>
+        <ion-button fill="clear" (click)="loadStudents()" [disabled]="loading" id="refresh-btn">
+          <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+
+  <!-- ====== Main Content ====== -->
+  <ion-content [fullscreen]="true" class="main-content">
+
+    <!-- Error Banner -->
+    <div class="error-banner" *ngIf="error" id="error-banner">
+      <ion-icon name="close-circle-outline"></ion-icon>
+      {{ error }}
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" *ngIf="loading" id="loading-indicator">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <span>Processing...</span>
+    </div>
+
+    <!-- ===== STUDENTS VIEW ===== -->
+    <div *ngIf="!showCharts" class="students-view">
+
+      <!-- Add Student Card -->
+      <ion-card class="glass-card add-card" id="add-student-card">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="add-circle-outline" color="primary"></ion-icon>
+            Add New Student
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-grid>
+            <ion-row class="align-items-center">
+              <ion-col size="12" size-md="5">
+                <ion-item class="input-item" lines="none">
+                  <ion-label position="stacked">Full Name</ion-label>
+                  <ion-input
+                    id="input-name"
+                    type="text"
+                    [(ngModel)]="newName"
+                    placeholder="e.g. Arjun Kumar"
+                    (keyup.enter)="addStudent()">
+                  </ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col size="12" size-md="5">
+                <ion-item class="input-item" lines="none">
+                  <ion-label position="stacked">Email Address</ion-label>
+                  <ion-input
+                    id="input-email"
+                    type="email"
+                    [(ngModel)]="newEmail"
+                    placeholder="e.g. arjun@example.com"
+                    (keyup.enter)="addStudent()">
+                  </ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col size="12" size-md="2" class="add-btn-col">
+                <ion-button
+                  id="add-student-btn"
+                  expand="block"
+                  color="primary"
+                  (click)="addStudent()"
+                  [disabled]="loading"
+                  class="add-btn">
+                  <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+                  Add
+                </ion-button>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Students Table Card -->
+      <ion-card class="glass-card table-card" id="students-table-card">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="list-outline" color="primary"></ion-icon>
+            Students
+            <ion-badge color="primary" class="count-badge">{{ students.length }}</ion-badge>
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content class="table-card-content">
+
+          <!-- Empty state -->
+          <div class="empty-state" *ngIf="!loading && students.length === 0" id="empty-state">
+            <ion-icon name="school-outline" class="empty-icon"></ion-icon>
+            <p>No students found. Add your first student above!</p>
+          </div>
+
+          <!-- Table wrapper -->
+          <div class="table-wrapper" *ngIf="students.length > 0">
+            <table class="students-table" id="students-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th class="mark-col">English</th>
+                  <th class="mark-col">Tamil</th>
+                  <th class="mark-col">Maths</th>
+                  <th class="total-col">Total</th>
+                  <th>Status</th>
+                  <th class="actions-col">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let student of students" class="student-row">
+
+                  <!-- Normal display row -->
+                  <ng-container *ngIf="editingId !== student.id && marksEditingId !== student.id">
+                    <td class="id-cell">{{ student.id }}</td>
+                    <td class="name-cell">{{ student.name }}</td>
+                    <td class="email-cell">{{ student.email }}</td>
+                    <td class="mark-col mark-val">{{ student.english }}</td>
+                    <td class="mark-col mark-val">{{ student.tamil }}</td>
+                    <td class="mark-col mark-val">{{ student.maths }}</td>
+                    <td class="total-col total-val">{{ student.total }}</td>
+                    <td>
+                      <div class="badges-wrap">
+                        <span [class]="'badge ' + (student.englishStatus === 'Pass' ? 'badge-pass' : 'badge-fail')">E: {{ student.englishStatus }}</span>
+                        <span [class]="'badge ' + (student.tamilStatus === 'Pass' ? 'badge-pass' : 'badge-fail')">T: {{ student.tamilStatus }}</span>
+                        <span [class]="'badge ' + (student.mathsStatus === 'Pass' ? 'badge-pass' : 'badge-fail')">M: {{ student.mathsStatus }}</span>
+                      </div>
+                    </td>
+                    <td class="actions-col">
+                      <div class="action-btns">
+                        <button class="act-btn edit-btn" (click)="startEdit(student)" title="Edit student info">
+                          <ion-icon name="create-outline"></ion-icon>
+                        </button>
+                        <button class="act-btn marks-btn" (click)="startMarksEdit(student)" title="Edit marks">
+                          <ion-icon name="bar-chart-outline"></ion-icon>
+                        </button>
+                        <button class="act-btn delete-btn" (click)="deleteStudent(student.id)" title="Delete student">
+                          <ion-icon name="trash-outline"></ion-icon>
+                        </button>
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <!-- Edit student name/email -->
+                  <ng-container *ngIf="editingId === student.id">
+                    <td class="id-cell">{{ student.id }}</td>
+                    <td><input class="inline-input" type="text" [(ngModel)]="editName" [id]="'edit-name-' + student.id" /></td>
+                    <td><input class="inline-input" type="email" [(ngModel)]="editEmail" [id]="'edit-email-' + student.id" /></td>
+                    <td class="mark-col">{{ student.english }}</td>
+                    <td class="mark-col">{{ student.tamil }}</td>
+                    <td class="mark-col">{{ student.maths }}</td>
+                    <td class="total-col total-val">{{ student.total }}</td>
+                    <td>
+                      <div class="badges-wrap">
+                        <span [class]="'badge ' + (student.englishStatus === 'Pass' ? 'badge-pass' : 'badge-fail')">E: {{ student.englishStatus }}</span>
+                        <span [class]="'badge ' + (student.tamilStatus === 'Pass' ? 'badge-pass' : 'badge-fail')">T: {{ student.tamilStatus }}</span>
+                        <span [class]="'badge ' + (student.mathsStatus === 'Pass' ? 'badge-pass' : 'badge-fail')">M: {{ student.mathsStatus }}</span>
+                      </div>
+                    </td>
+                    <td class="actions-col">
+                      <div class="action-btns">
+                        <button class="act-btn save-btn" (click)="saveEdit(student.id)" title="Save">
+                          <ion-icon name="checkmark-circle-outline"></ion-icon>
+                        </button>
+                        <button class="act-btn cancel-btn" (click)="cancelEdit()" title="Cancel">
+                          <ion-icon name="close-circle-outline"></ion-icon>
+                        </button>
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <!-- Edit marks -->
+                  <ng-container *ngIf="marksEditingId === student.id">
+                    <td class="id-cell">{{ student.id }}</td>
+                    <td class="name-cell">{{ student.name }}</td>
+                    <td class="email-cell">{{ student.email }}</td>
+                    <td class="mark-col">
+                      <input class="inline-input mark-input"
+                        [class.invalid]="editEnglish < 0 || editEnglish > 100"
+                        type="number" min="0" max="100"
+                        [(ngModel)]="editEnglish"
+                        [id]="'edit-english-' + student.id" />
+                    </td>
+                    <td class="mark-col">
+                      <input class="inline-input mark-input"
+                        [class.invalid]="editTamil < 0 || editTamil > 100"
+                        type="number" min="0" max="100"
+                        [(ngModel)]="editTamil"
+                        [id]="'edit-tamil-' + student.id" />
+                    </td>
+                    <td class="mark-col">
+                      <input class="inline-input mark-input"
+                        [class.invalid]="editMaths < 0 || editMaths > 100"
+                        type="number" min="0" max="100"
+                        [(ngModel)]="editMaths"
+                        [id]="'edit-maths-' + student.id" />
+                    </td>
+                    <td class="total-col total-val">{{ editTotal }}</td>
+                    <td>
+                      <div class="badges-wrap">
+                        <span [class]="'badge ' + (editEnglish >= 40 ? 'badge-pass' : 'badge-fail')">E: {{ editEnglish >= 40 ? 'Pass' : 'Fail' }}</span>
+                        <span [class]="'badge ' + (editTamil >= 40 ? 'badge-pass' : 'badge-fail')">T: {{ editTamil >= 40 ? 'Pass' : 'Fail' }}</span>
+                        <span [class]="'badge ' + (editMaths >= 40 ? 'badge-pass' : 'badge-fail')">M: {{ editMaths >= 40 ? 'Pass' : 'Fail' }}</span>
+                      </div>
+                    </td>
+                    <td class="actions-col">
+                      <div class="action-btns">
+                        <button class="act-btn save-btn"
+                          (click)="saveMarks(student.id)"
+                          [disabled]="editEnglish < 0 || editEnglish > 100 || editTamil < 0 || editTamil > 100 || editMaths < 0 || editMaths > 100"
+                          title="Save Marks">
+                          <ion-icon name="checkmark-circle-outline"></ion-icon>
+                        </button>
+                        <button class="act-btn cancel-btn" (click)="cancelMarksEdit()" title="Cancel">
+                          <ion-icon name="close-circle-outline"></ion-icon>
+                        </button>
+                      </div>
+                    </td>
+                  </ng-container>
+
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- ===== CHARTS VIEW ===== -->
+    <div *ngIf="showCharts" class="charts-view" id="charts-view">
+      <app-charts [students]="students"></app-charts>
+    </div>
+
+  </ion-content>
+</ion-app>
